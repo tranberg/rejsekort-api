@@ -34,7 +34,7 @@ async function logIn(username, password) {
   })
 };
 
-// Get recent travels and token for form to get all travels
+// Get token for form to get all travels
 async function get_travel_form_token() {
   var res = await agent.get(recent_travels_url)
   var token_string = res.text.match(/antiForgeryToken = '<input name="__RequestVerificationToken.*/)[0]
@@ -47,11 +47,36 @@ async function get_all_travels() {
 
   await get_travel_form_token()
 
+  // Get first set of travels
   var res = await agent.post(all_travels_url).type('form').send({
     periodSelected: 'All',
     __RequestVerificationToken: travel_token
   })
   all_travels_html = res.text
+
+  // Loop over all pages until all travels are included
+  finished = false
+  iteration = 1
+  while (!finished) {
+    // Get new token
+    var token_string = res.text.match(/antiForgeryToken = '<input name="__RequestVerificationToken.*/)[0]
+    var token = token_string.match(/value=".*"/)[0].slice(7, 99)
+
+    // Load next page
+    var res = await agent.post(all_travels_url).type('form').send({
+      periodSelected: 'All',
+      __RequestVerificationToken: token,
+      page: `${iteration*5+1}`
+    })
+
+    // Check if page contains additional travels
+    if (!res.text.match(/Error, please try again later./)) {
+      all_travels_html = all_travels_html + res.text
+    } else {
+      finished = true
+    }
+    iteration++
+  }
 }
 
 // Parse travels by looping over all 'tr' elements across tables
@@ -98,7 +123,7 @@ function parse_travels() {
     }
   })
 
-  // Change data format for app
+  // Change data format for Greenbit
   const ACTIVITY_TYPE_TRANSPORTATION = 'ACTIVITY_TYPE_TRANSPORTATION';
   const TRANSPORTATION_MODE_PUBLIC = 'public';
   const activities = [];
