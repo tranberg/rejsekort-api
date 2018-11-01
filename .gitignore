@@ -1,3 +1,4 @@
 creds.ini
 .ipynb_checkpoints/
 tmp/
+node_modules/
