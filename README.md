@@ -25,6 +25,8 @@ Node
 ----
 
 	npm install superagent cheerio
-	node fetch-travels-async.js <username> <password>
+	node fetch-travels.js <username> <password>
 
 The script will output all travels from the last 13 months (Rejsekort limit) formatted for inclusion in Greenbit.
+
+The script is currently only tested for travels starting and ending within the same date.
