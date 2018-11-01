@@ -92,12 +92,15 @@ function parse_travels() {
       skip_row = true
       $(this).children('td').each(function() {
         if (td_index > 1) {
+          // Check existence of travel number.
           if (td_index == 2) {
-            if ($(this).text().length == 2) {
-              skip_row = false
-              travel_index++
-              travel_list[travel_index] = {}
-              travel_list[travel_index]['number'] = $(this).text()
+            if ($(this).text().length > 0) {
+              if (!$(this).text().match('/')) {
+                skip_row = false
+                travel_index++
+                travel_list[travel_index] = {}
+                travel_list[travel_index]['number'] = $(this).text()
+              }
             }
           }
           if (!skip_row) {
